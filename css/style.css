@@ -1,0 +1,239 @@
+* {
+   box-sizing: border-box;
+}
+
+body {
+   width: 100%;
+   min-height: 100vh;
+   font-family: "Helvetica Neue", 'Arial', sans-serif;
+   font-size: 16px;
+   background-image: url('../img/meadow.jpg');
+   background-size: cover;
+}
+
+ul, ol, li {
+   margin: 0;
+   padding: 0;
+   list-style: none;
+}
+
+ul {
+   padding-left: 0;
+}
+
+.container {
+   position: relative;
+   max-width: 1200px;
+   width: fit-content;
+   padding-top: 100px;
+   padding-bottom: 200px;
+}
+
+.btn {
+   display: block;
+   margin: 0 auto;
+}
+
+/* стратовое меню */
+.start-menu {
+   max-width: 250px;
+   margin: 0 auto;
+   margin-bottom: 20px;
+   /* padding-top: 10px; */
+}
+
+.start-menu__text {
+   color: #fff;
+}
+
+.start-menu__contr-input {
+   display: block;
+   margin-bottom: 20px;
+}
+
+.start-menu__text_fail {
+   display: none;
+   padding: 5px 10px;
+   color: red;
+   background-color: black;
+}
+
+.input-invalid + .start-menu__text {
+   display: block;
+}
+
+.start-menu__btn {
+   display: inline-block;
+   width: 100%;
+   border-color: azure;
+   background: bottom;
+   box-shadow: 0 0 18px;
+}
+
+.start-menu__btn:hover {
+   border-color: azure;
+   background-color: yellowgreen;
+}
+
+.start-menu__btn:focus {
+   border-color: yellowgreen;
+   background: transparent;
+}
+
+/* отрисовка игры */
+.contr-cards {
+   margin-bottom: 30px;
+}
+
+.contr-cards__row {
+   display: flex;
+}
+
+.contr-cards__row:not(:last-child) {
+   margin-bottom: 1rem;
+}
+
+.contr-cards__row_size1:not(:last-child) {
+   margin-bottom: 0.9rem;
+}
+
+.contr-cards__row_size2:not(:last-child) {
+   margin-bottom: 0.5rem;
+}
+
+.contr-cards__card {
+   position: relative;
+   width: 100px;
+   height: 123px;
+   border-radius: 10px;
+   perspective: 700px;
+   box-shadow: 0 0 14px #8ac2e5b3;
+   cursor: pointer;
+}
+
+.contr-cards__card_size1 {
+   width: 83px;
+   height: 119px;
+}
+
+.contr-cards__card_size2 {
+   width: 63px;
+   height: 89px;
+}
+
+.contr-cards__card:not(:last-child) {
+   margin-right: 20px;
+}
+
+.contr-cards__card_size1:not(:last-child) {
+   margin-right: 0.9rem;
+}
+
+.contr-cards__card_size2:not(:last-child) {
+   margin-right: 0.5rem;
+}
+
+.card_wait .contr-cards__card-front,
+.card_active .contr-cards__card-front {
+   transform: rotateY(360deg);
+}
+
+.card_wait .contr-cards__card-back,
+.card_active .contr-cards__card-back {
+   transform: rotateY(180deg);
+}
+
+.contr-cards__card-back,
+.contr-cards__card-front {
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   border-radius: 10px;
+   transition: transform .5s ease-in-out;
+   backface-visibility: hidden;
+}
+
+.contr-cards__card-front {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 25px;
+   color: #087cd2;
+   background-color: white;
+   transform: rotateY(180deg);
+}
+
+.contr-cards__card-back {
+   /* background-color: #8ac2e5; */
+   background-image: url('../img/back-card15.svg');
+   /* background-size: 300px 880px; */
+   /* background-size: 200px 480px; */
+   background-size: cover;
+   /* background-position: center; */
+   /* background-repeat: no-repeat; */
+}
+
+.btn-new-game {
+   margin-top: 30px;
+   padding: 10px;
+   background: #319209;
+   border-color: white;
+}
+
+.btn-new-game:hover {
+   background: #3fb70d;
+   border-color: white;
+}
+
+.btn-new-game:focus {
+   background: #3fb70d;
+   border-color: white;
+   box-shadow: 0 0 20px #3fb70d;
+}
+
+.btn-restart-contr {
+   position: absolute;
+   left: -174px;
+   top: 103px;
+   display: flex;
+   align-items: center;
+   flex-direction: column;
+}
+
+.btn-restart {
+   max-width: 220px;
+   border-color: azure;
+   background: bottom;
+}
+
+.btn-restart:hover {
+   border-color: azure;
+   background: yellowgreen;
+}
+
+.btn-restart:focus {
+   border-color: yellowgreen;
+   background: transparent;
+}
+
+/* отрисовка таймера  */
+#container {
+   position: relative;
+   margin: 20px;
+   width: 70px;
+   height: 70px;
+}
+
+.contr-timer__number {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   display: block;
+   text-align: center;
+   font-size: 23px;
+   font-weight: bold;
+   color: white;
+}
