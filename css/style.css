@@ -166,13 +166,8 @@ ul {
 }
 
 .contr-cards__card-back {
-   /* background-color: #8ac2e5; */
    background-image: url('../img/back-card15.svg');
-   /* background-size: 300px 880px; */
-   /* background-size: 200px 480px; */
    background-size: cover;
-   /* background-position: center; */
-   /* background-repeat: no-repeat; */
 }
 
 .btn-new-game {

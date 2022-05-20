@@ -16,51 +16,111 @@
          [array[i], array[j]] = [array[j], array[i]];
       }
    };
+   // создаём li и наполняем его (одну карточку)
+   function createCard() {
+      const card = document.createElement('li');
+      const cardFront = document.createElement('span');
+      const cardBack = document.createElement('span');
+      card.className = 'contr-cards__card';
+      cardFront.className = 'contr-cards__card-front';
+      cardBack.className = 'contr-cards__card-back';
+
+      return {
+         card,
+         cardFront,
+         cardBack,
+      };
+   };
+   // изменяем размер карточек в зависимости от их кол-ва
+   function adaptiveCardSize(columns, adaptiveItem, classSize1, classSize2) {
+      // если колонок больше 4, то уменьшаем размер оступов между рядами
+      if ((columns > 4) && (columns <= 6)) {
+         adaptiveItem.classList.add(classSize1);
+      } else if (columns > 6) {
+         adaptiveItem.classList.add(classSize2);
+      };
+   }
+   // создаём сетку карточек
+   function createGridCards(arrValueInputs, keySessionGame) {
+      // создаём контейнер для всех карт  
+      const contrCards = document.createElement('div');
+      contrCards.classList.add('contr-cards');
+
+      // получаем кол-во карточек по горизонтали и по вертикали
+      let [row, column] = arrValueInputs;
+      let cards = row * column;
+
+      for (let i = 0; column > i; ++i) {
+         const rowCards = document.createElement('ul');
+         rowCards.className = 'contr-cards__row';
+
+         // если колонок больше 4, то уменьшаем размер оступов между рядами
+         adaptiveCardSize(column, rowCards, 'contr-cards__row_size1', 'contr-cards__row_size2');
+
+         for (let i = 0; row > i; ++i) {
+            // получаем наполненный li(одну карточку)
+            const cardFull = createCard();
+            const card = cardFull.card;
+            const cardFront = cardFull.cardFront;
+            const cardBack = cardFull.cardBack;
+
+            // если колонок больше 4 то уменьшаем размер карточек и отступы между ними            
+            adaptiveCardSize(column, card, 'contr-cards__card_size1', 'contr-cards__card_size2');
+
+            // вешаем слушатель на li
+            card.addEventListener('click', () => recordStateCard(card, keySessionGame, cards));
+
+            // добавляем созданные li в ul
+            card.append(cardBack);
+            card.append(cardFront);
+            rowCards.append(card);
+         };
+         // добавляем ul со всеми li в container
+         contrCards.append(rowCards);
+      };
+      return contrCards;
+   };
    // обработчик события на карточке
    function recordStateCard(card, keySessionGame, allCards) {
 
       if (!(card.classList.contains('card_active') || card.classList.contains('card_wait'))) {
-         // получаем элемент который "ждёт"
+         // получаем элементы которые "ждут(wait)"
          const cardsWait = document.querySelectorAll('.card_wait');
 
-         // проверяем есть ли уже открытые проверяемые карточки
-         if (cardsWait.length < 2) {
+         // проверяем есть ли открытые карточки
+         if (cardsWait.length === 0) {
+            // нет - открываем "кликнутую"
+            card.classList.add('card_wait');
+            // записываем это событие в ЛС
+            recordLocalStorage(keySessionGame);
 
-            // проверяем есть ли уже карточка "ждущая пары"
-            if (cardsWait.length === 0) {
-               // нет - открываем "кликнутую"
-               card.classList.add('card_wait');
-
-               recordLocalStorage(keySessionGame);
-
-               // есть -проверяем на одинаковость
-            } else if (cardsWait[0].textContent === card.lastChild.textContent) {
+         } else if (cardsWait.length === 1) {
+            // есть -проверяем на одинаковость
+            if (cardsWait[0].textContent === card.lastChild.textContent) {
                // одинаковы - открываем их как "пару"
                cardsWait.forEach((item) => item.classList.remove('card_wait'));
                cardsWait.forEach((item) => item.classList.add('card_active'));
                card.classList.add('card_active');
-
+               // записываем это событие в ЛС
                recordLocalStorage(keySessionGame);
 
             } else {
-               // не одинаковы - закрываем их обоих (предватирельно открыв на время)
                card.classList.add('card_wait');
-
-               window.setTimeout(() => {
-                  card.classList.remove('card_wait');
-                  cardsWait.forEach((item) => item.classList.remove('card_wait'));
-
-                  recordLocalStorage(keySessionGame);
-               }, 600);
+               // записываем это событие в ЛС
+               recordLocalStorage(keySessionGame);
             };
 
-            // проверяем закончилась ли игра
-            checkStateGame(keySessionGame, allCards);
+         } else {
+            // 2 и более карточки wait (то есть открыты но не в паре)       
+            cardsWait.forEach((item) => item.classList.remove('card_wait'));
+            card.classList.add('card_wait');
+            // записываем это событие в ЛС
+            recordLocalStorage(keySessionGame);
          };
 
-
+         // проверяем закончилась ли игра
+         checkStateGame(keySessionGame, allCards);
       };
-
    };
    // запись в LS изменений после каждого клика по карточке
    function recordLocalStorage(keySessionGame) {
@@ -80,19 +140,24 @@
          };
 
          // создаём объект с информацией об одной карточке и пушим его в массив
-         const cardInfo = {};
-         cardInfo.number = card.textContent;
-         cardInfo.state = state;
+         const cardInfo = createObjectInfoCard(card.textContent, state);
          arrayLocalStorage.push(cardInfo);
       };
 
       localStorage.setItem(keySessionGame, JSON.stringify(arrayLocalStorage));
    };
+   // создаём объект с информацией об одной карточке и пушим его в массив
+   function createObjectInfoCard(propNumber, propState) {
+      const cardInfo = {};
+      cardInfo.number = propNumber;
+      cardInfo.state = propState;
+      return cardInfo;
+   };
    // проверяем закончилась ли игра
    function checkStateGame(keySessionGame, rowAndColumn = 16) {
       const activeCards = document.querySelectorAll('.card_active');
 
-      if (activeCards.length == rowAndColumn) {
+      if (activeCards.length === rowAndColumn) {
          // останавливаем таймер если ещё не остановлен
          let timer = runTimerRestart();
          timer(true);
@@ -140,56 +205,6 @@
       });
       return btnNewStart;
    }
-   // создаём сетку карточек
-   function createGridCards(arrValueInputs, keySessionGame) {
-      // создаём контейнер для всех карт  
-      const contrCards = document.createElement('div');
-      contrCards.classList.add('contr-cards');
-
-      // получаем кол-во карточек по горизонтали и по вертикали
-      let [row, column] = arrValueInputs;
-      let cards = row * column;
-
-      for (let i = 0; column > i; ++i) {
-         const rowCards = document.createElement('ul');
-         rowCards.className = 'contr-cards__row';
-
-         // если колонок больше 4 то уменьшаем ращмер карточек
-         if ((column > 4) && (column <= 6)) {
-            rowCards.classList.add('contr-cards__row_size1');
-         } else if (column > 6) {
-            rowCards.classList.add('contr-cards__row_size2');
-         };
-
-         for (let i = 0; row > i; ++i) {
-            // создаём li и наполняем его 
-            const card = document.createElement('li');
-            const cardFront = document.createElement('span');
-            const cardBack = document.createElement('span');
-            card.className = 'contr-cards__card';
-            cardFront.className = 'contr-cards__card-front';
-            cardBack.className = 'contr-cards__card-back';
-
-            // если колонок больше 4 то уменьшаем ращмер карточек
-            if ((column > 4) && (column <= 6)) {
-               card.classList.add('contr-cards__card_size1');
-            } else if (column > 6) {
-               card.classList.add('contr-cards__card_size2');
-            }
-
-            // вешаем слушатель на li
-            card.addEventListener('click', () => recordStateCard(card, keySessionGame, cards));
-
-            // добавляем созданные li в ul
-            card.append(cardBack);
-            card.append(cardFront);
-            rowCards.append(card);
-         };
-         // добавляем ul со всеми li в container
-         contrCards.append(rowCards);
-      };
-      return contrCards;
-   };
 
    // создаём контейнер для таймера
    function createContrTimer() {
@@ -200,13 +215,12 @@
       contrTimer.id = 'container';
       timerNumber.classList.add('contr-timer__number');
 
-      // contrTimer.append(timerText);
       contrTimer.append(timerNumber);
 
       return contrTimer;
    };
    // функция таймер   
-   function runTimerRestart(timeTimer = 300, keySessionGame) {
+   function runTimerRestart(timeTimer, keySessionGame) {
       const numberTimer = document.querySelector('.contr-timer__number');
       let stateTimer = timeTimer;
       let timerId;
@@ -229,6 +243,7 @@
 
          // запускаем таймер
          timerId = setInterval(() => {
+            // завершаем интервал, если таймер достиг 0
             if (stateTimer == 0) {
                return;
             }
@@ -255,21 +270,23 @@
 
             // закончить игру когда таймер равен нулю
             if ((stateTimer) == 0) {
-               // setTimeout(() => document.querySelector('.btn-restart').click(), 1000);
 
                setTimeout(() => {
+                  // открываем все карты 
                   const allCards = document.querySelectorAll('.contr-cards__card');
                   for (let card of allCards) {
                      card.classList.remove('card_wait');
                      card.classList.add('card_active');
                   };
+
+                  // и записываем это событие в ЛС
                   const valueStateCards = JSON.parse(localStorage.getItem(keySessionGame));
                   for (let stateCard of valueStateCards) {
                      stateCard.state = 'active';
                   };
                   localStorage.setItem(keySessionGame, JSON.stringify(valueStateCards));
-                  // checkStateGame(keySessionGame);
 
+                  // отрисовывем кнопку "сыграть ещё раз"
                   const btnNewStart = createBtnNewGame(keySessionGame);
                   const btnRestartContr = document.querySelector('.btn-restart-contr');
                   btnRestartContr.append(btnNewStart);
@@ -277,7 +294,6 @@
                }, 1000);
                return;
             };
-
 
          }, 1000);
          return stateTimer;
@@ -300,14 +316,11 @@
       });
       bar.animate(1.0);
 
-
       if (localStorage.getItem('timer-progress') !== null) {
-
          let progress = localStorage.getItem('timer-progress');
          bar.set(progress);
          bar.animate(1.0);
       };
-
       window.bar = bar;
 
       return bar;
@@ -322,54 +335,7 @@
          startMenu.classList.add('start-menu');
 
          // создаём контейнера со span и input
-         for (let i = 0; i < 3; ++i) {
-            const contrInput = document.createElement('label');
-            const spanInput1 = document.createElement('span');
-            const spanInput2 = document.createElement('span');
-            const input = document.createElement('input');
-
-            // добавляем им классы
-            contrInput.classList.add('start-menu__contr-input');
-            input.classList.add('start-menu__input', 'form-control');
-            spanInput1.classList.add('start-menu__text', 'form-text');
-            spanInput2.classList.add('start-menu__text', 'form-text', 'start-menu__text_fail');
-            if (i < 2) {
-               input.classList.add('start-menu__input_layout');
-            } else {
-               input.classList.add('start-menu__input_timer');
-            }
-
-            // добавляем аттрибуты
-            if (i === 2) {
-               input.type = 'number';
-               input.min = '10';
-               input.max = '300';
-               input.value = '60';
-            } else {
-               input.type = 'number';
-               input.min = '2';
-               input.max = '10';
-               input.value = '4';
-            }
-
-            // вкладываем текстовый контент в span
-            if (i === 0) {
-               spanInput1.textContent = 'Кол-во карточек по горизонтали';
-               spanInput2.textContent = '( пожалуйста, введите чётное число от 2 до 10 )';
-            } else if (i === 1) {
-               spanInput1.textContent = 'Кол-во карточек по вертикали';
-               spanInput2.textContent = '( пожалуйста, введите чётное число от 2 до 10 )';
-            } else {
-               spanInput1.textContent = 'Время таймера, завершающего игру';
-               spanInput2.textContent = '( пожалуйста, введите число от 10 до 300 )';
-            };
-
-            // собираем "матрёшку"
-            contrInput.append(spanInput1);
-            contrInput.append(input);
-            contrInput.append(spanInput2);
-            startMenu.append(contrInput);
-         };
+         createStartInput(startMenu);
          // создаём кнопку
          const btnStartGame = document.createElement('button');
          btnStartGame.classList.add('start-menu__btn', 'btn', 'btn-success');
@@ -406,12 +372,11 @@
                      input.classList.add('input-invalid');
                      input.classList.remove('input-valid');
                   };
-               }
-
+               };
             };
 
             // отрисовываем игру если все input валидны   
-            const arrInputs = Array.from(inputs)
+            const arrInputs = Array.from(inputs);
 
             if (arrInputs.find((item) => item.classList.contains('input-invalid')) === undefined) {
 
@@ -428,7 +393,6 @@
                const inputTimerValue = document.querySelector('.start-menu__input_timer');
                const valueTimer = inputTimerValue.value;
 
-
                localStorage.setItem(keyValueInputs, JSON.stringify(valueInputs));
                localStorage.setItem('start-value-timer', JSON.stringify(valueTimer));
 
@@ -444,6 +408,58 @@
          const valueInputs = JSON.parse(localStorage.getItem(keyValueInputs));
          const valueTimer = JSON.parse(localStorage.getItem('start-value-timer'));
          createGameCards(valueInputs, keySessionGame, valueTimer);
+      };
+   };
+   // создаём контейнера со span и input для стартового меню
+   function createStartInput(contrAllInputs) {
+
+      for (let i = 0; i < 3; ++i) {
+         const contrInput = document.createElement('label');
+         const spanInput1 = document.createElement('span');
+         const spanInput2 = document.createElement('span');
+         const input = document.createElement('input');
+
+         // добавляем им классы
+         contrInput.classList.add('start-menu__contr-input');
+         input.classList.add('start-menu__input', 'form-control');
+         spanInput1.classList.add('start-menu__text', 'form-text');
+         spanInput2.classList.add('start-menu__text', 'form-text', 'start-menu__text_fail');
+         if (i < 2) {
+            input.classList.add('start-menu__input_layout');
+         } else {
+            input.classList.add('start-menu__input_timer');
+         };
+
+         // добавляем аттрибуты
+         if (i === 2) {
+            input.type = 'number';
+            input.min = '10';
+            input.max = '300';
+            input.value = '60';
+         } else {
+            input.type = 'number';
+            input.min = '2';
+            input.max = '10';
+            input.value = '4';
+         };
+
+         // вкладываем текстовый контент в span
+         if (i === 0) {
+            spanInput1.textContent = 'Кол-во карточек по горизонтали';
+            spanInput2.textContent = '( пожалуйста, введите чётное число от 2 до 10 )';
+         } else if (i === 1) {
+            spanInput1.textContent = 'Кол-во карточек по вертикали';
+            spanInput2.textContent = '( пожалуйста, введите чётное число от 2 до 10 )';
+         } else {
+            spanInput1.textContent = 'Время таймера, завершающего игру';
+            spanInput2.textContent = '( пожалуйста, введите число от 10 до 300 )';
+         };
+
+         // собираем "матрёшку"
+         contrInput.append(spanInput1);
+         contrInput.append(input);
+         contrInput.append(spanInput2);
+         contrAllInputs.append(contrInput);
       };
    };
 
@@ -490,9 +506,7 @@
 
          // создаём объект с информацией об одной карточке и пушим его в массив
          for (let j = 0; array.length > j; ++j) {
-            const cardInfo = {};
-            cardInfo.number = array[j];
-            cardInfo.state = false;
+            const cardInfo = createObjectInfoCard(array[j], false);
             arrLocalStorage.push(cardInfo);
          };
          // записываем созданный массив с информацией о сессии в LS 
