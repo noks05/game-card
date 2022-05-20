@@ -37,10 +37,12 @@ ul {
 
 /* стратовое меню */
 .start-menu {
-   max-width: 250px;
+   max-width: 290px;
    margin: 0 auto;
    margin-bottom: 20px;
-   /* padding-top: 10px; */
+   border-radius: 10px;
+   padding: 20px;
+   background-color: #0992da;
 }
 
 .start-menu__text {
@@ -59,7 +61,7 @@ ul {
    background-color: black;
 }
 
-.input-invalid + .start-menu__text {
+.input-invalid+.start-menu__text {
    display: block;
 }
 
@@ -196,6 +198,13 @@ ul {
    display: flex;
    align-items: center;
    flex-direction: column;
+}
+
+@media(max-width: 768px) {
+   .btn-restart-contr {
+      position: static;
+      margin-bottom: 50px;
+   }
 }
 
 .btn-restart {
