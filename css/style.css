@@ -198,6 +198,13 @@ ul {
    flex-direction: column;
 }
 
+@media(max-width: 768px) {
+   .btn-restart-contr {
+      position: static;
+      margin-bottom: 50px;
+   }   
+}
+
 .btn-restart {
    max-width: 220px;
    border-color: azure;
