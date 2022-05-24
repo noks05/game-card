@@ -204,7 +204,11 @@ ul {
    .btn-restart-contr {
       position: static;
       margin-bottom: 50px;
+<<<<<<< HEAD
    }
+=======
+   }   
+>>>>>>> 7953e005e741a58358b4f3f680b68cc43dcd2206
 }
 
 .btn-restart {
